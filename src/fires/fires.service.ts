@@ -17,7 +17,9 @@ export class FiresService {
     // Convert the CSV data to JSON
     const jsonData = await csvtojson().fromString(csvData);
 
+    const returnData = jsonData.filter((_, idx) => idx < 20);
+
     // Return the JSON data
-    return jsonData;
+    return returnData;
   }
 }
