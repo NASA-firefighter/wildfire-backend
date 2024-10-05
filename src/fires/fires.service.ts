@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import * as csvtojson from 'csvtojson'; // Correct import for csvtojson
+import * as csvtojson from 'csvtojson';
 
 @Injectable()
 export class FiresService {
-  async getFireData(): Promise<any> {
-    const url =
-      'https://firms.modaps.eosdis.nasa.gov/api/area/csv/e2f39e4db008b224206b270ed8bae06f/VIIRS_SNPP_NRT/world/1';
+  async getFireData(date: string): Promise<any> {
+    const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/5d7359a6d0e9d5adc5546281ebcbe071/VIIRS_SNPP_NRT/world/3/${date}`;
 
     const response = await axios.get(url, {
       responseType: 'text', // Fetch the CSV as plain text
@@ -17,9 +16,11 @@ export class FiresService {
     // Convert the CSV data to JSON
     const jsonData = await csvtojson().fromString(csvData);
 
-    const returnData = jsonData.filter((_, idx) => idx < 20);
+    // Sort by brightness and select top 100 brightest fires
+    const topFireData = jsonData
+      .sort((a, b) => parseFloat(b.bright_ti4) - parseFloat(a.bright_ti4))
+      .slice(0, 100); // Select top 100
 
-    // Return the JSON data
-    return returnData;
+    return topFireData;
   }
 }
